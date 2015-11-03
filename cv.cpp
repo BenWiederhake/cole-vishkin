@@ -113,7 +113,7 @@ static void fill_rnd_minstd(size_t* const begin, const size_t length,
 /*
 void fill_rnd_whatever(size_t* begin, size_t length, size_t seed) {
     // FIXME
-    // TODO: If you add an algorithm, update try_parse!
+    // If you add an algorithm, update try_parse!
     abort();
 }
 */
@@ -213,6 +213,10 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             }
             if (std::string("minstd") == argv[i]) {
                 into.init_pattern_fn = fill_rnd_minstd;
+/*
+            } else if (std::string("whatever") == argv[i]) {
+                    into.init_pattern_fn = fill_rnd_whatever;
+*/
             } else {
                 return "Only 'minstd' is supported as --init-pattern, sorry.";
             }
