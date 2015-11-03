@@ -16,7 +16,7 @@
  *
  * Execute (defaults):
  *   cv --cpus 4 --length 268435456 --init-pattern minstd --init-seed 0 \
- *   --file cv_out_<pattern>_<seed>.dat
+ *   --file cv_out.dat
  *
  * The length is chosen so that it uses 2 GiB on 64-bit machines
  * and 1 GiB on 32-bit machines.
@@ -39,13 +39,13 @@
  * feel free to copy the following into a header file and access the
  * functionality through it: */
 
-extern const std::string CV_about;
+extern const std::string cv_about;
 typedef void (*cv_fill_fn_t)(size_t*,size_t,size_t);
 extern cv_fill_fn_t cv_default_fill;
 class cv_opts {
 public:
     size_t cpus = 4;
-    std::string file_out_name = "";
+    std::string file_out_name = "cv_out.dat";
     cv_fill_fn_t init_pattern_fn = cv_default_fill;
     size_t init_seed = 0;
     size_t length = 1024; // FIXME: Change to 268435456. I'm using something small for TESTING ONLY.
@@ -108,14 +108,14 @@ cv_fill_fn_t cv_default_fill = fill_rnd_minstd;
 
 /* ===== Commandline parsing ===== */
 
-const std::string CV_about = ""
+const std::string cv_about = ""
 "CV, a Cole-Vishkin emulator in C++11.\n"
 #ifndef NDEBUG
 "Compiled without NDEBUG (so this is the slow version).\n"
 #else
 "Compiled with NDEBUG (so this is the fast version).\n"
 #endif
-"Default arguments: --cpus 4 --file-out cv_out_<pattern>_<seed>.dat \\\n"
+"Default arguments: --cpus 4 --file-out cv_out.dat \\\n"
 "    --init-pattern minstd --init-seed 0 --length 268435456 --rounds 4\n"
 "\n"
 "Explanation of each argument:\n"
@@ -126,6 +126,8 @@ const std::string CV_about = ""
 "    The file to which the result should be written. A bit pointless,\n"
 "    since no-one reads it anyways. But without this, Cole-Vishkin would be\n"
 "    utterly pointless.\n"
+"--help:\n"
+"    Prints this help text and quits.\n"
 "--init-pattern <type>:\n"
 "    Name of the initial pattern. Currently, only one type is supported,\n"
 "    namely 'minstd', which uses std::minstd_rand to generate the colors.\n"
@@ -148,14 +150,110 @@ const std::string CV_about = ""
 "    5: 2^64 bits or less\n"
 "    6: YAGNI\n"
 "\n"
-"Go forth and haveth fun!\n";
+"Go forth and haveth fun!"; // No trailing newline!
+
+static const char* advance(int& i, const int argc) {
+    ++i;
+    if (i < argc) {
+        return nullptr;
+    }
+    return "Needs an argument.";
+}
+
+static const char* try_stos(const char* str, size_t& into) {
+    try {
+        into = std::stoll(str);
+        return nullptr;
+    } catch (std::invalid_argument) {
+        return "Need a numeric argument.";
+    } catch (std::out_of_range) {
+        return "Expected numeric argument.";
+    }
+}
 
 /* Returns a human-readable string on error, nullptr otherwise. */
 const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
-    // FIXME
-    // TODO: Also do sanity checking (e.g. no more than 20 rounds,
-    //       short filename, 1 <= cpus <= 256, etc.)
-    abort();
+    /* Ignore own name, so start at 1: */
+    for (int i = 1; i < argc; ++i) {
+        const char* err = nullptr;
+        if (std::string("--cpus") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if ((err = try_stos(argv[i], into.cpus))) {
+                return err;
+            }
+            ++i;
+        } else if (std::string("--file-out") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            into.file_out_name = argv[i];
+            ++i;
+        } else if (std::string("--help") == argv[i]) {
+            printf("%s\n", cv_about.c_str());
+            return "";
+        } else if (std::string("--init-pattern") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if (std::string("minstd") == argv[i]) {
+                into.init_pattern_fn = fill_rnd_minstd;
+            } else {
+                return "Only 'minstd' is supported as --init-pattern, sorry.";
+            }
+        } else if (std::string("--init-seed") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if ((err = try_stos(argv[i], into.init_seed))) {
+                return err;
+            }
+            ++i;
+        } else if (std::string("--length") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if ((err = try_stos(argv[i], into.length))) {
+                return err;
+            }
+            ++i;
+        } else if (std::string("--rounds") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if ((err = try_stos(argv[i], into.rounds))) {
+                return err;
+            }
+            ++i;
+        } else {
+            printf("At option %s\n", argv[i]);
+            return "Unrecognized option";
+        }
+    }
+
+    if (into.cpus < 1 || into.cpus > 256) {
+        return "Invalid amount of cpus.";
+    }
+    if (into.length < into.cpus) {
+        return "Must use at least #cpus many nodes in the list.";
+    }
+    if (into.length > (1ULL << 28)) {
+        printf("Warning: More that 1<<28 nodes. This means you'll need >1GiB on"
+                " 32-bit,\n and >2GiB on 64-bit platforms.");
+    }
+    if (into.length > (1ULL << 31)) {
+        return "Error: More that 1<<31 nodes. This means you'll need >8GiB on"
+                " 32-bit,\n and >16GiB on 64-bit platforms.";
+    }
+    if (into.rounds < 1) {
+        return "Number of rounds must be positive.";
+    }
+    if (into.rounds < 4) {
+        printf("Warning: with this few rounds, you may not end up with <= 6 colors.");
+    }
+
+    return nullptr;
 }
 
 
@@ -184,7 +282,7 @@ int cv_main(int argc, char **argv, bool print_errors) {
     const char* err = cv_try_parse(opts, argc, argv);
     if (err) {
         if (print_errors) {
-            printf(err);
+            printf("%s\n", err);
         }
         return 1;
     }
@@ -193,7 +291,7 @@ int cv_main(int argc, char **argv, bool print_errors) {
     size_t* arr = static_cast<size_t*>(malloc(opts.length * sizeof(size_t)));
     if (!arr) {
         if (print_errors) {
-            printf("malloc failed!");
+            printf("malloc failed!\n");
         }
         return 2;
     }
@@ -206,7 +304,7 @@ int cv_main(int argc, char **argv, bool print_errors) {
     free(arr);
     if (err) {
         if (print_errors) {
-            printf(err);
+            printf("%s\n", err);
         }
         return 3;
     }
