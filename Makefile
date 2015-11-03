@@ -1,10 +1,10 @@
 all: compile-debug
 
 cv-debug: cv.cpp
-	gcc -std=c++11 cv.cpp -o $@ -O0 -g3 -Wall -Wextra -Werror -pedantic
+	g++ -std=c++11 cv.cpp -o $@ -O0 -g3 -Wall -Wextra -Werror -pedantic
 
 cv-fast: cv.cpp
-	gcc -std=c++11 cv.cpp -o $@ -O3 -finline-functions -DNDEBUG
+	g++ -std=c++11 cv.cpp -o $@ -O3 -finline-functions -DNDEBUG
 
 .PHONY: compile-debug run-debug compile-fast run-fast
 
