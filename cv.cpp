@@ -26,6 +26,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstdio>
+#include <random>
 #include <string>
 #include <thread>
 #include <vector>
@@ -93,8 +94,20 @@ static void run_chunk(size_t* const begin, size_t* const end,
 
 static void fill_rnd_minstd(size_t* const begin, const size_t length,
                             const size_t seed) {
-    // FIXME
-    abort();
+    std::minstd_rand generator(seed);
+    std::uniform_int_distribution<size_t> distrib;
+
+    begin[0] = distrib(generator);
+    for (size_t i = 1; i < length; ++i) {
+        begin[i] = distrib(generator);
+        if (begin[i] == begin[i - 1]) {
+            --i;
+        }
+    }
+    size_t* last = begin + (length - 1);
+    while (*last == *begin) {
+        *last = distrib(generator);
+    }
 }
 
 /*
