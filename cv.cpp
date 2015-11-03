@@ -278,9 +278,47 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
 /* ===== Control worker threads ===== */
 
 void cv_start_and_join_workers(size_t* const begin, const size_t length,
-                             const size_t cpus, const size_t rounds) {
-    // FIXME
-    abort();
+                               const size_t cpus, const size_t rounds) {
+    std::vector<size_t> border;
+    border.emplace_back(0);
+    for (size_t i = 1; i < 1 + cpus; ++i) {
+        border.emplace_back((length * i) / cpus);
+        if (border[i] < border[i - 1]) {
+            assert("Dangit, jumped down!" || false);
+            abort();
+        }
+    }
+
+    std::vector<std::vector<size_t>> buf;
+    for (size_t i = 0; i < cpus; ++i) {
+        buf.emplace_back();
+        if (border[i + 1] + rounds <= length) {
+            buf.back().insert(buf.back().end(),
+                    begin + border[i + 1], begin + border[i + 1]);
+        } else {
+            /* Should compute offsets and batch-insert.
+             * But 'rounds' is small enough, so it doesn't matter. */
+            for (size_t j = 0, pos = border[i + 1]; j < rounds; ++j) {
+                if (pos >= length) {
+                    pos -= length;
+                }
+                buf.back().push_back(begin[pos]);
+            }
+        }
+    }
+
+    /* This already starts the workers, not only allocates them! */
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < cpus; ++i) {
+        /*run_chunk(size_t* const begin, size_t* const end,
+                              std::vector<size_t> following)*/
+        threads.emplace_back(run_chunk, begin + border[i],
+                begin + border[i + 1], std::move(buf[i]));
+    }
+
+    for (std::thread& t : threads) {
+        t.join();
+    }
 }
 
 
