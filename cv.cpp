@@ -56,7 +56,7 @@ public:
 const char* cv_try_parse(cv_opts& into, const int argc, char** const argv);
 void cv_start_and_join_workers(size_t* const begin, const size_t length,
                              const size_t cpus, const size_t rounds);
-const char* cv_write_file(const size_t* const begin, const size_t length,
+const char* cv_write_file(size_t* const begin, const size_t length,
                           const std::string& file_out_name);
 int cv_main(int argc, char **argv, bool print_errors = true);
 /* Note: you can disable the 'main' symbol by compiling with -DCV_NO_MAIN. */
@@ -322,19 +322,25 @@ void cv_start_and_join_workers(size_t* const begin, const size_t length,
 
 /* ===== Write to file ===== */
 
-const char* cv_write_file(const size_t* const begin, const size_t length,
+const char* cv_write_file(size_t* const begin, const size_t length,
                 const std::string& file_out_name) {
     FILE* fp = fopen64(file_out_name.c_str(), "wb");
     if (!fp) {
         return "fopen failed. (Bad filename? Write permissions?)";
     }
 
-    const size_t bytes = length * sizeof(size_t);
-    const size_t written = fwrite(begin, 1, bytes, fp);
+    /* Shamelessly overwrite old data. The only collision happens at the very
+     * first operation, and here it is okay, too, because it's cached. */
+    unsigned char* data = reinterpret_cast<unsigned char*>(begin);
+    for (size_t i = 0; i < length; ++i) {
+        data[i] = (unsigned char)begin[i];
+    }
 
-    if (written != bytes) {
+    const size_t written = fwrite(begin, 1, length, fp);
+
+    if (written != length) {
         printf("Wrote only %ld of %ld bytes. errno is %d. ferror is %d.\n",
-                written, bytes, errno, ferror(fp));
+                written, length, errno, ferror(fp));
     }
 
     if (fclose(fp)) {
