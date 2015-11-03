@@ -24,6 +24,7 @@
  */
 
 #include <cassert>
+#include <chrono>
 #include <cstdio>
 #include <string>
 #include <thread>
@@ -270,14 +271,33 @@ void cv_start_and_join_workers(size_t* const begin, const size_t length,
 
 const char* cv_write_file(const size_t* const begin, const size_t length,
                 const std::string& file_out_name) {
-    // FIXME
-    abort();
+    FILE* fp = fopen64(file_out_name.c_str(), "wb");
+    if (!fp) {
+        return "fopen failed. (Bad filename? Write permissions?)";
+    }
+
+    if (1 != fwrite(begin, length * sizeof(size_t), 1, fp)) {
+        return "fwrite failed. (Write permissions? enough space?)";
+    }
+
+    fclose(fp);
+    return nullptr;
 }
 
 
 /* ===== Holistic ===== */
 
+typedef std::chrono::high_resolution_clock my_clock_t;
+
+// explain(clock_finish - clock_init, "<All>");
+static void explain(const my_clock_t::duration dur, const std::string& reason) {
+    printf("%s took %ld ms.\n", reason.c_str(),
+           std::chrono::duration_cast<std::chrono::milliseconds>(dur).count());
+}
+
 int cv_main(int argc, char **argv, bool print_errors) {
+    const my_clock_t::time_point clock_init = my_clock_t::now();
+
     cv_opts opts;
     const char* err = cv_try_parse(opts, argc, argv);
     if (err) {
@@ -297,8 +317,10 @@ int cv_main(int argc, char **argv, bool print_errors) {
     }
 
     opts.init_pattern_fn(arr, opts.length, opts.init_seed);
+    const my_clock_t::time_point clock_ready = my_clock_t::now();
 
     cv_start_and_join_workers(arr, opts.length, opts.cpus, opts.rounds);
+    const my_clock_t::time_point clock_done = my_clock_t::now();
 
     err = cv_write_file(arr, opts.length, opts.file_out_name);
     free(arr);
@@ -308,6 +330,14 @@ int cv_main(int argc, char **argv, bool print_errors) {
         }
         return 3;
     }
+    const my_clock_t::time_point clock_finish = my_clock_t::now();
+
+    /* Output statistics: */
+    explain(clock_ready - clock_init, "Initialization");
+    explain(clock_done - clock_ready, "Cole-Vishkin");
+    explain(clock_finish - clock_done, "Cleanup");
+    explain(clock_finish - clock_init, "<All>");
+
     return 0;
 }
 
