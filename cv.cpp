@@ -3,13 +3,13 @@
  * Please see LICENSE or http://creativecommons.org/publicdomain/zero/1.0/
  *
  * Compile (minimal command):
- *   g++ -std=c++11 cv.cpp -o cv
+ *   g++ -std=c++11 cv.cpp -o cv -pthread
  *
  * Compile (in-depth error checking):
- *   g++ -std=c++11 cv.cpp -o cv -O0 -g3 -Wall -Wextra -Werror -pedantic
+ *   g++ -std=c++11 cv.cpp -o cv -pthread -O0 -g3 -Wall -Wextra -Werror -pedantic
  *
  * Compile (optimized executable):
- *   g++ -std=c++11 cv.cpp -o cv -O3 -finline-functions -DNDEBUG
+ *   g++ -std=c++11 cv.cpp -o cv -pthread -O3 -finline-functions -DNDEBUG
  *
  * Execute:
  *   cv
