@@ -77,8 +77,12 @@ static inline void compute_cv(size_t* const which, const size_t* const with) {
 
 static void run_chunk(size_t* const begin, size_t* const end,
                       std::vector<size_t> following) {
+    if (begin == end) {
+        return;
+    }
+    printf("Begin of chunk at %p\n", static_cast<const void*>(begin));
     while (!following.empty()) {
-        for (size_t* ptr = begin; ptr != end; ++ptr) {
+        for (size_t* ptr = begin; ptr + 1 != end; ++ptr) {
             compute_cv(ptr, ptr + 1);
         }
         compute_cv(end, &following.front());
