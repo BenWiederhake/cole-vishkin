@@ -11,7 +11,7 @@ cv-fast: cv.cpp
 compile-debug: cv-debug
 
 run-debug: cv-debug
-	./cv-debug
+	./cv-debug --cpus 1
 
 compile-fast: cv-fast
 

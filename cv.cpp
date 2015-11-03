@@ -80,12 +80,11 @@ static void run_chunk(size_t* const begin, size_t* const end,
     if (begin == end) {
         return;
     }
-    printf("Begin of chunk at %p\n", static_cast<const void*>(begin));
     while (!following.empty()) {
-        for (size_t* ptr = begin; ptr + 1 != end; ++ptr) {
-            compute_cv(ptr, ptr + 1);
+        for (size_t* ptr = begin + 1; ptr != end; ++ptr) {
+            compute_cv(ptr - 1, ptr);
         }
-        compute_cv(end, &following.front());
+        compute_cv(end - 1, &following.front());
         for (size_t i = 1; i < following.size(); ++i) {
             compute_cv(&following[i - 1], &following[i]);
         }
@@ -105,11 +104,15 @@ static void fill_rnd_minstd(size_t* const begin, const size_t length,
     for (size_t i = 1; i < length; ++i) {
         begin[i] = distrib(generator);
         if (begin[i] == begin[i - 1]) {
+            printf("Color collision on initialization!"
+                    " (Insufficient PRNG. Change PRNG or change seed.)");
             --i;
         }
     }
     size_t* last = begin + (length - 1);
     while (*last == *begin) {
+        printf("Color collision on initialization!"
+                " (Insufficient PRNG. Change PRNG or change seed.)");
         *last = distrib(generator);
     }
 }
@@ -296,19 +299,15 @@ void cv_start_and_join_workers(size_t* const begin, const size_t length,
     std::vector<std::vector<size_t>> buf;
     for (size_t i = 0; i < cpus; ++i) {
         buf.emplace_back();
-        if (border[i + 1] + rounds <= length) {
-            buf.back().insert(buf.back().end(),
-                    begin + border[i + 1], begin + border[i + 1]);
-        } else {
-            /* Should compute offsets and batch-insert.
-             * But 'rounds' is small enough, so it doesn't matter. */
-            for (size_t j = 0, pos = border[i + 1]; j < rounds; ++j) {
-                if (pos >= length) {
-                    pos -= length;
-                }
-                buf.back().push_back(begin[pos]);
+        /* Should compute offsets and batch-insert.
+         * But 'rounds' is small enough, so it doesn't matter. */
+        for (size_t j = 0, pos = border[i + 1]; j < rounds; ++j, ++pos) {
+            if (pos >= length) {
+                pos -= length;
             }
+            buf.back().push_back(begin[pos]);
         }
+        assert(buf.back().size() == rounds);
     }
 
     /* This already starts the workers, not only allocates them! */
