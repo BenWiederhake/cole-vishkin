@@ -46,7 +46,7 @@ class cv_opts {
 public:
     size_t cpus = 4;
     std::string file_out_name = "";
-    cvfill_fn_t init_pattern_fn = cv_default_fill;
+    cv_fill_fn_t init_pattern_fn = cv_default_fill;
     size_t init_seed = 0;
     size_t length = 1024; // FIXME: Change to 268435456. I'm using something small for TESTING ONLY.
     size_t rounds = 4;
