@@ -204,13 +204,11 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if ((err = try_stos(argv[i], into.cpus))) {
                 return err;
             }
-            ++i;
         } else if (std::string("--file-out") == argv[i]) {
             if ((err = advance(i, argc))) {
                 return err;
             }
             into.file_out_name = argv[i];
-            ++i;
         } else if (std::string("--help") == argv[i]) {
             printf("%s\n", cv_about.c_str());
             return "";
@@ -234,7 +232,6 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if ((err = try_stos(argv[i], into.init_seed))) {
                 return err;
             }
-            ++i;
         } else if (std::string("--length") == argv[i]) {
             if ((err = advance(i, argc))) {
                 return err;
@@ -242,7 +239,6 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if ((err = try_stos(argv[i], into.length))) {
                 return err;
             }
-            ++i;
         } else if (std::string("--rounds") == argv[i]) {
             if ((err = advance(i, argc))) {
                 return err;
@@ -250,7 +246,6 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if ((err = try_stos(argv[i], into.rounds))) {
                 return err;
             }
-            ++i;
         } else {
             printf("At option %s\n", argv[i]);
             return "Unrecognized option";
