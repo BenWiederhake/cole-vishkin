@@ -329,11 +329,17 @@ const char* cv_write_file(const size_t* const begin, const size_t length,
         return "fopen failed. (Bad filename? Write permissions?)";
     }
 
-    if (1 != fwrite(begin, length * sizeof(size_t), 1, fp)) {
-        return "fwrite failed. (Write permissions? enough space?)";
+    const size_t bytes = length * sizeof(size_t);
+    const size_t written = fwrite(begin, 1, bytes, fp);
+
+    if (written != bytes) {
+        printf("Wrote only %ld of %ld bytes. errno is %d. ferror is %d.\n",
+                written, bytes, errno, ferror(fp));
     }
 
-    fclose(fp);
+    if (fclose(fp)) {
+        printf("Closing failed, data might be incomplete(?)");
+    }
     return nullptr;
 }
 
