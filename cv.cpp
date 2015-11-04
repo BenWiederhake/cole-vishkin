@@ -117,6 +117,43 @@ static void fill_rnd_minstd(size_t* const begin, const size_t length,
     }
 }
 
+static size_t xorshift128plus_seed[2];
+size_t xorshift128plus(void) {
+    /* Taken from Wikipedia's article on fast PRNGs:
+     * https://en.wikipedia.org/wiki/Xorshift#Xorshift.2B
+     * Paper: http://vigna.di.unimi.it/ftp/papers/xorshiftplus.pdf */
+    size_t x = xorshift128plus_seed[0];
+    size_t const y = xorshift128plus_seed[1];
+    xorshift128plus_seed[0] = y;
+    x ^= x << 23; // a
+    x ^= x >> 17; // b
+    x ^= y ^ (y >> 26); // c
+    xorshift128plus_seed[1] = x;
+    return x + y;
+}
+
+static void fill_rnd_xorshift128plus(size_t* const begin, size_t const length,
+                                     size_t const seed) {
+    xorshift128plus_seed[0] = seed;
+    xorshift128plus_seed[1] = 0x8000000080004021UL;
+
+    begin[0] = xorshift128plus();
+    for (size_t i = 1; i < length; ++i) {
+        begin[i] = xorshift128plus();
+        if (begin[i] == begin[i - 1]) {
+            printf("Color collision on initialization!"
+                    " (Insufficient PRNG. Change PRNG or change seed.)");
+            --i;
+        }
+    }
+    size_t* last = begin + (length - 1);
+    while (*last == *begin) {
+        printf("Color collision on initialization!"
+                " (Insufficient PRNG. Change PRNG or change seed.)");
+        *last = xorshift128plus();
+    }
+}
+
 /*
 void fill_rnd_whatever(size_t* begin, size_t length, size_t seed) {
     // FIXME
@@ -150,8 +187,10 @@ const std::string cv_about = ""
 "--help:\n"
 "    Prints this help text and quits.\n"
 "--init-pattern <type>:\n"
-"    Name of the initial pattern. Currently, only one type is supported,\n"
-"    namely 'minstd', which uses std::minstd_rand to generate the colors.\n"
+"    Name of the initial pattern. Currently, only two types are supported,\n"
+"    namely 'minstd', which uses std::minstd_rand to generate the colors,\n"
+"    and 'xorshift128plus', which uses this:\n"
+"        https://en.wikipedia.org/wiki/Xorshift#Xorshift.2B\n"
 "    Note that, no matter the pattern used, duplicates will be skipped.\n"
 "    Note that future versions may introduce a --init-max argument.\n"
 "--init-seed <n>:\n"
@@ -218,12 +257,15 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             }
             if (std::string("minstd") == argv[i]) {
                 into.init_pattern_fn = fill_rnd_minstd;
+            } else if (std::string("xorshift128plus") == argv[i]) {
+                    into.init_pattern_fn = fill_rnd_xorshift128plus;
 /*
             } else if (std::string("whatever") == argv[i]) {
                     into.init_pattern_fn = fill_rnd_whatever;
 */
             } else {
-                return "Only 'minstd' is supported as --init-pattern, sorry.";
+                return "Only 'minstd' and 'xorshift128plus' are supported"
+                        " as --init-pattern, sorry.";
             }
         } else if (std::string("--init-seed") == argv[i]) {
             if ((err = advance(i, argc))) {
