@@ -15,8 +15,8 @@
  *   cv
  *
  * Execute (defaults):
- *   cv --cpus 4 --length 268435456 --init-pattern minstd --init-seed 0 \
- *   --file cv_out.dat
+ *   cv --cpus 4 --file-out cv_out.dat --format human \
+ "      --init-pattern minstd --init-seed 0 --length 268435456 --rounds 4
  *
  * The length is chosen so that it uses 2 GiB on 64-bit machines
  * and 1 GiB on 32-bit machines.
@@ -44,6 +44,9 @@
 extern const std::string cv_about;
 typedef void (*cv_fill_fn_t)(size_t*,size_t,size_t);
 extern cv_fill_fn_t cv_default_fill;
+extern const std::string cv_output_format_none;
+extern const std::string cv_output_format_human;
+extern const std::string cv_output_format_tdl;
 class cv_opts {
 public:
     size_t cpus = 4;
@@ -52,6 +55,7 @@ public:
     size_t init_seed = 0;
     size_t length = 268435456;
     size_t rounds = 4;
+    std::string output_format = cv_output_format_human;
 };
 const char* cv_try_parse(cv_opts& into, const int argc, char** const argv);
 void cv_start_and_join_workers(size_t* const begin, const size_t length,
@@ -181,7 +185,7 @@ const std::string cv_about = ""
 #else
 "Compiled with NDEBUG (so this is the fast version).\n"
 #endif
-"Default arguments: --cpus 4 --file-out cv_out.dat \\\n"
+"Default arguments: --cpus 4 --file-out cv_out.dat --format human \\\n"
 "    --init-pattern minstd --init-seed 0 --length 268435456 --rounds 4\n"
 "\n"
 "Explanation of each argument:\n"
@@ -192,6 +196,13 @@ const std::string cv_about = ""
 "    The file to which the result should be written. A bit pointless,\n"
 "    since no-one reads it anyways. But without this, Cole-Vishkin would be\n"
 "    utterly pointless.\n"
+"--format <type>\n"
+"    How the gathered statistics should be output. There is:\n"
+"    none: Doesn't print anything unless there's an error.\n"
+"    human: Human readable text. Ideal for a single run.\n"
+"    tdl: Tab-delimited line. Ideal for batch execution. The order is the same\n"
+"        as with human-readable: Init, CV, Cleanup, <ALL>. where <ALL> is more\n"
+"        accurate than summing up the previous three.\n"
 "--help:\n"
 "    Prints this help text and quits.\n"
 "--init-pattern <type>:\n"
@@ -219,6 +230,14 @@ const std::string cv_about = ""
 "    6: YAGNI\n"
 "\n"
 "Go forth and haveth fun!"; // No trailing newline!
+
+const std::string cv_output_format_none = "";
+const std::string cv_output_format_human = ""
+"Initialization took %ld ms.\n"
+"Cole-Vishkin took %ld ms.\n"
+"Cleanup took %ld ms.\n"
+"<All> took %ld ms.\n";
+const std::string cv_output_format_tdl = "%ld\t%ld\t%ld\t%ld\n";
 
 static const char* advance(int& i, const int argc) {
     ++i;
@@ -266,10 +285,10 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if (std::string("minstd") == argv[i]) {
                 into.init_pattern_fn = fill_rnd_minstd;
             } else if (std::string("xorshift128plus") == argv[i]) {
-                    into.init_pattern_fn = fill_rnd_xorshift128plus;
+                into.init_pattern_fn = fill_rnd_xorshift128plus;
 /*
             } else if (std::string("whatever") == argv[i]) {
-                    into.init_pattern_fn = fill_rnd_whatever;
+                into.init_pattern_fn = fill_rnd_whatever;
 */
             } else {
                 return "Only 'minstd' and 'xorshift128plus' are supported"
@@ -295,6 +314,24 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             }
             if ((err = try_stos(argv[i], into.rounds))) {
                 return err;
+            }
+        } else if (std::string("--format") == argv[i]) {
+            if ((err = advance(i, argc))) {
+                return err;
+            }
+            if (std::string("none") == argv[i]) {
+                into.output_format = cv_output_format_none;
+            } else if (std::string("human") == argv[i]) {
+                into.output_format = cv_output_format_human;
+            } else if (std::string("tdl") == argv[i]) {
+                into.output_format = cv_output_format_tdl;
+/*
+            } else if (std::string("whatever") == argv[i]) {
+                into.output_format = cv_output_format_whatever;
+*/
+            } else {
+                return "Only 'none', 'human', and 'tdl' are supported"
+                        " as --format, sorry.";
             }
         } else {
             printf("At option %s\n", argv[i]);
@@ -405,9 +442,8 @@ const char* cv_write_file(size_t* const begin, const size_t length,
 typedef std::chrono::high_resolution_clock my_clock_t;
 
 // explain(clock_finish - clock_init, "<All>");
-static void explain(const my_clock_t::duration dur, const std::string& reason) {
-    printf("%s took %ld ms.\n", reason.c_str(),
-           std::chrono::duration_cast<std::chrono::milliseconds>(dur).count());
+static size_t duration_to_ms(const my_clock_t::duration dur) {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
 }
 
 int cv_main(int argc, char **argv, bool print_errors) {
@@ -448,10 +484,11 @@ int cv_main(int argc, char **argv, bool print_errors) {
     const my_clock_t::time_point clock_finish = my_clock_t::now();
 
     /* Output statistics: */
-    explain(clock_ready - clock_init, "Initialization");
-    explain(clock_done - clock_ready, "Cole-Vishkin");
-    explain(clock_finish - clock_done, "Cleanup");
-    explain(clock_finish - clock_init, "<All>");
+    const size_t ms_init = duration_to_ms(clock_ready - clock_init);
+    const size_t ms_cv = duration_to_ms(clock_done - clock_ready);
+    const size_t ms_cleanup = duration_to_ms(clock_finish - clock_done);
+    const size_t ms_all = duration_to_ms(clock_finish - clock_init);
+    printf(opts.output_format.c_str(), ms_init, ms_cv, ms_cleanup, ms_all);
 
     return 0;
 }

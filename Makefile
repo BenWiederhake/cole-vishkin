@@ -20,23 +20,46 @@ run-fast: cv-fast
 
 analyze: cv-fast
 # Generated using ./analyze.sh
-	./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 1
-	./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 4
-	./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 1
+	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 1
+	#
+	@./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 2
+	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 2
+	#
+	@./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 3
+	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 3
+	#
+	@./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 4
+	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 4
