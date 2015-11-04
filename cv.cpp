@@ -103,18 +103,22 @@ static void fill_rnd_minstd(size_t* const begin, const size_t length,
     begin[0] = distrib(generator);
     for (size_t i = 1; i < length; ++i) {
         begin[i] = distrib(generator);
+#ifndef NDEBUG
         if (begin[i] == begin[i - 1]) {
             printf("Color collision on initialization!"
                     " (Insufficient PRNG. Change PRNG or change seed.)");
             --i;
         }
+#endif
     }
     size_t* last = begin + (length - 1);
+#ifndef NDEBUG
     while (*last == *begin) {
         printf("Color collision on initialization!"
                 " (Insufficient PRNG. Change PRNG or change seed.)");
         *last = distrib(generator);
     }
+#endif
 }
 
 static size_t xorshift128plus_seed[2];
@@ -140,18 +144,22 @@ static void fill_rnd_xorshift128plus(size_t* const begin, size_t const length,
     begin[0] = xorshift128plus();
     for (size_t i = 1; i < length; ++i) {
         begin[i] = xorshift128plus();
+#ifndef NDEBUG
         if (begin[i] == begin[i - 1]) {
             printf("Color collision on initialization!"
                     " (Insufficient PRNG. Change PRNG or change seed.)");
             --i;
         }
+#endif
     }
     size_t* last = begin + (length - 1);
+#ifndef NDEBUG
     while (*last == *begin) {
         printf("Color collision on initialization!"
                 " (Insufficient PRNG. Change PRNG or change seed.)");
         *last = xorshift128plus();
     }
+#endif
 }
 
 /*
