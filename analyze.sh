@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for cpus in $(seq 1 4)
+for cpus in $(seq 1 5)
 do
 	for i in $(seq 1 10)
 	do

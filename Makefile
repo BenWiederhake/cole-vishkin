@@ -63,3 +63,14 @@ analyze: cv-fast
 	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 4 --format tdl
 	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 4 --format tdl
 	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 4 --format tdl
+	#
+	@./cv-fast --init-pattern xorshift128plus --init-seed 1 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 2 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 3 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 4 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 5 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 6 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 7 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 8 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 9 --file-out /dev/null --cpus 5 --format tdl
+	@./cv-fast --init-pattern xorshift128plus --init-seed 10 --file-out /dev/null --cpus 5 --format tdl
