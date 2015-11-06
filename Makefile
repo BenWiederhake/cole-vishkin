@@ -76,3 +76,47 @@ analyze: cv-fast
 	@./cv-fast --init-seed 8 --cpus 5 ${CV_ANALYZE_OPTS}
 	@./cv-fast --init-seed 9 --cpus 5 ${CV_ANALYZE_OPTS}
 	@./cv-fast --init-seed 10 --cpus 5 ${CV_ANALYZE_OPTS}
+	#
+	@./cv-fast --init-seed 1 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 2 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 3 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 4 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 5 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 6 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 7 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 8 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 9 --cpus 6 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 10 --cpus 6 ${CV_ANALYZE_OPTS}
+	#
+	@./cv-fast --init-seed 1 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 2 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 3 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 4 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 5 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 6 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 7 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 8 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 9 --cpus 7 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 10 --cpus 7 ${CV_ANALYZE_OPTS}
+	#
+	@./cv-fast --init-seed 1 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 2 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 3 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 4 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 5 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 6 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 7 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 8 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 9 --cpus 8 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 10 --cpus 8 ${CV_ANALYZE_OPTS}
+	#
+	@./cv-fast --init-seed 1 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 2 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 3 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 4 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 5 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 6 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 7 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 8 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 9 --cpus 9 ${CV_ANALYZE_OPTS}
+	@./cv-fast --init-seed 10 --cpus 9 ${CV_ANALYZE_OPTS}

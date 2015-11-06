@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo '##CV_ANALYZE_OPTS="--init-pattern xorshift128plus --file-out /dev/null --format tdl --length 536870912 --length-force"'
-for cpus in $(seq 1 5)
+for cpus in $(seq 1 9)
 do
 	for i in $(seq 1 10)
 	do
