@@ -18,7 +18,7 @@ compile-fast: cv-fast
 run-fast: cv-fast
 	./cv-fast
 
-CV_ANALYZE_OPTS=--init-pattern xorshift128plus --file-out /dev/null --format tdl --length 536870912
+CV_ANALYZE_OPTS=--init-pattern xorshift128plus --file-out /dev/null --format tdl --length 536870912 --length-force
 
 analyze: cv-fast
 # Generated using ./analyze.sh

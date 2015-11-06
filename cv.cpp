@@ -317,6 +317,10 @@ const std::string cv_about = ""
 "    Length of the simulated list. Note that cv will need approximately this\n"
 "    many words of memory. For the default amount (roughly 200 million), this\n"
 "    equals 2 GiB on a 64-bit machine, or 1 GiB on a 32-bit one.\n"
+"--length-force\n"
+"    Accept the length without issueing a warning.\n"
+"    DO THIS ONLY WHEN YOU KNOW WHICH WARNING YOU ARE IGNORING!\n"
+"    (Otherwise it will eat all your RAM.)\n"
 "--rounds <n>:\n"
 "    The number of rounds for which Cole-Vishkin should be executed.\n"
 "    Here's a table about how long the initial color may be for each value:\n"
@@ -358,6 +362,8 @@ static const char* try_stos(const char* str, size_t& into) {
 
 /* Returns a human-readable string on error, nullptr otherwise. */
 const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
+    bool warn_length = true;
+
     /* Ignore own name, so start at 1: */
     for (int i = 1; i < argc; ++i) {
         const char* err = nullptr;
@@ -406,6 +412,8 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
             if ((err = try_stos(argv[i], into.length))) {
                 return err;
             }
+        } else if (std::string("--length-force") == argv[i]) {
+            warn_length = false;
         } else if (std::string("--rounds") == argv[i]) {
             if ((err = advance(i, argc))) {
                 return err;
@@ -443,7 +451,7 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
     if (into.length < into.cpus) {
         return "Must use at least #cpus many nodes in the list.";
     }
-    if (into.length > (1ULL << 28)) {
+    if (into.length > (1ULL << 28) && warn_length) {
         printf("Warning: More that 1<<28 nodes. This means you'll need >1GiB on"
                 " 32-bit,\nand >2GiB on 64-bit platforms.\n");
     }
