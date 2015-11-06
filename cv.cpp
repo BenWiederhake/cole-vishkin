@@ -79,21 +79,119 @@ static inline void compute_cv(size_t* const which, const size_t* const with) {
     *which = orig_bit | (num << 1);
 }
 
-static void run_chunk(size_t* const begin, size_t* const end,
+static void run_chunk(size_t* const begin, size_t const length,
                       std::vector<size_t> following) {
-    if (begin == end) {
+    if (0 == length) {
         return;
     }
-    while (!following.empty()) {
-        for (size_t* ptr = begin + 1; ptr != end; ++ptr) {
-            compute_cv(ptr - 1, ptr);
+    const size_t iterations = following.size();
+
+    /*
+     * === Set up invariants for the loop. ===
+     * Call position p to be e-established if at least one holds:
+     * - e is 0 and p has it's original color
+     * - p is only one update (from compute_cv) away from getting the color it
+     *   would have after e iterations of original Cole-Vishkin (starting at 1),
+     *   and (p+1) is (e-1)-established.
+     * Using this definition, the task of the "setup" is the get the beginning
+     * to be e-established where e is the number of iterations we are
+     * supposed to execute.
+     *
+     * Example: Let's look at the "how many"th version of a color we are seeing.
+     * Then we want to do the following during this setup:
+     * 0000000...
+     * 1000000...
+     * 2100000...
+     * 3210000...
+     * If we have "--rounds 4", then we stop here, because the beginning is now
+     * 4-established (the next iteration would compute the color after executing
+     * 4 rounds of Cole-Vishkin).
+     *
+     * Note that initially, all positions are 0-established *and* 1-established.
+     */
+    for (size_t e = 1; e < iterations; ++e) {
+        /* Beginning is e-established and needs to be
+         * at least (e+1)-established. We need to walk from back to front! */
+        for (size_t i = e; i != 0; --i) {
+            compute_cv(begin + i - 1, begin + i);
         }
-        compute_cv(end - 1, &following.front());
+    }
+
+    /*
+     * === Loop (with invariant) ===
+     * At the beginning of the loop, position i is iterations-established.
+     * (See above for definition.)
+     * Call position p to be "complete" if it has the color it would have after
+     * 'iterations' many iterations of Cole-Vishkin. Then the goal of this step
+     * is to make as many positions "complete" as possible, without accessing
+     * the buffer containing the original colors of the next part.
+     *
+     * Note that the first position we can't get to be 2-established this way
+     * is the last position (begin[length-1]).
+     * One can show that the first position we can't get to be e-established
+     * this way is at begin[length-e+1].
+     */
+    const size_t completable_end = length - iterations;
+#ifndef CV_NO_SPECIALIZE
+    /* I'm not sure whether gcc can see that the if has always the same result
+     * during a call to run_chunk, so better play it safe. */
+    if (4 == iterations) {
+        for (size_t p = 0; p < completable_end; ++p) {
+            /* I'm not sure whether the explicit loop can be unrolled by gcc,
+             * so let's to it this way. */
+            compute_cv(begin + (p + 3), begin + (p + 4));
+            compute_cv(begin + (p + 2), begin + (p + 3));
+            compute_cv(begin + (p + 1), begin + (p + 2));
+            compute_cv(begin + (p + 0), begin + (p + 1));
+        }
+    } else {
+#endif
+        for (size_t p = 0; p < completable_end; ++p) {
+            for (size_t i = iterations; i != 0; --i) {
+                compute_cv(begin + (p + (i - 1)), begin + (p + i));
+            }
+        }
+#ifndef CV_NO_SPECIALIZE
+    }
+#endif
+
+    /*
+     * === Finishing up ===
+     * Now we only have to care about the last few positions which require the
+     * data in the variable 'following'. This is essentially the old
+     * implementation.
+     * So then why don't we just use this simple code instead of the above?
+     * The code below is highly efficient, no doubt. It does the best it can,
+     * and only when it really needs to do anything.
+     *
+     * However, the following starts each iteration as a completely new thing.
+     * If you're dealing with a block of 4+4 values, like here, that's
+     * irrelevant. But when a "block" is the full input, then you're iteration
+     * over the full input, 4 (=iterations) times. So you read the full input
+     * 4 times and write it back 4 times. In benchmarks on my machine, the
+     * following code hits the memory speed limit of roughly 10 GiB/s, so the
+     * above implementation does away with 6 of the 8 mentioned accesses
+     * (as in "load/store between the L{1,2,3} caches and RAM", not as in
+     * "amount of lw/sw instructions").
+     *
+     * Note that we have to work backwards, and make the *last* position
+     * 2-established first.
+     */
+    /* "plus one" because "completable_end == 0" is possible. */
+    for (size_t p_plus_1 = length - 1 + 1; p_plus_1 >= completable_end + 1; --p_plus_1) {
+        const size_t p = p_plus_1 - 1;
+        assert(!following.empty());
+        /* Sorry for the naming. */
+        for (size_t p2 = p; p2 < length - 1; ++p2) {
+            compute_cv(begin + p2, begin + (p2 + 1));
+        }
+        compute_cv(begin + (length - 1), &following.front());
         for (size_t i = 1; i < following.size(); ++i) {
             compute_cv(&following[i - 1], &following[i]);
         }
         following.erase(--following.end());
     }
+    assert(following.empty());
 }
 
 
@@ -398,7 +496,7 @@ void cv_start_and_join_workers(size_t* const begin, const size_t length,
         /*run_chunk(size_t* const begin, size_t* const end,
                               std::vector<size_t> following)*/
         threads.emplace_back(run_chunk, begin + border[i],
-                begin + border[i + 1], std::move(buf[i]));
+                border[i + 1] - border[i], std::move(buf[i]));
     }
 
     for (std::thread& t : threads) {
