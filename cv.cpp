@@ -445,17 +445,17 @@ const char* cv_try_parse(cv_opts& into, const int argc, char** const argv) {
     }
     if (into.length > (1ULL << 28)) {
         printf("Warning: More that 1<<28 nodes. This means you'll need >1GiB on"
-                " 32-bit,\n and >2GiB on 64-bit platforms.");
+                " 32-bit,\nand >2GiB on 64-bit platforms.\n");
     }
     if (into.length > (1ULL << 31)) {
         return "Error: More that 1<<31 nodes. This means you'll need >8GiB on"
-                " 32-bit,\n and >16GiB on 64-bit platforms.";
+                " 32-bit,\nand >16GiB on 64-bit platforms.";
     }
     if (into.rounds < 1) {
         return "Number of rounds must be positive.";
     }
     if (into.rounds < 4) {
-        printf("Warning: with this few rounds, you may not end up with <= 6 colors.");
+        printf("Warning: with this few rounds, you may not end up with >= 6 colors.\n");
     }
 
     return nullptr;
